@@ -1,0 +1,373 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Tech Review — Mobile Specifications & Video Reviews</title>
+  <meta name="description" content="Tech Review: Discover, compare and explore detailed smartphone specifications, field-by-field GSMArena-style tables, and embedded YouTube video reviews.">
+
+  <!-- FontAwesome Icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+  <!-- ===== NAVBAR ===== -->
+  <nav class="navbar">
+    <a href="index.html" class="logo-group">
+      <div class="logo-icon">
+        <i class="fa-solid fa-mobile-screen-button"></i>
+      </div>
+      <div style="display:flex; align-items:center; gap:0.5rem;">
+        <span class="logo-text">TECH REVIEW</span>
+        <span class="logo-tag">PRO</span>
+      </div>
+    </a>
+
+    <!-- Theme Toggle — 3-Way Pill -->
+    <div class="theme-toggle-group" id="themeToggleGroup" title="Switch Theme">
+      <button class="theme-btn" id="themeLight" onclick="setTheme('light')" title="Light Theme">
+        <i class="fa-solid fa-sun"></i>
+      </button>
+      <button class="theme-btn active" id="themeSystem" onclick="setTheme('system')" title="System Default">
+        <i class="fa-solid fa-circle-half-stroke"></i>
+      </button>
+      <button class="theme-btn" id="themeDark" onclick="setTheme('dark')" title="Dark Theme">
+        <i class="fa-solid fa-moon"></i>
+      </button>
+    </div>
+
+    <div class="nav-actions" id="navActions">
+      <!-- Dynamic User Navigation State Rendered via JS -->
+    </div>
+  </nav>
+
+  <!-- ===== HERO SECTION ===== -->
+  <section class="hero-section">
+    <div class="container">
+      <h1 class="hero-title">Discover, Compare & Review Smartphones</h1>
+      <p class="hero-subtitle">Detailed field-by-field specification tables, interactive specs, and embedded 4K YouTube video reviews — powered by Tech Review.</p>
+
+      <!-- Search Input -->
+      <div class="search-container">
+        <div class="search-input-wrapper">
+          <i class="fa-solid fa-magnifying-glass"></i>
+          <input type="text" id="searchInput" class="search-input" placeholder="Search by model, brand, chipset (e.g. Snapdragon, OLED, 5000mAh)...">
+        </div>
+      </div>
+
+      <!-- Quick Brand Filters -->
+      <div class="brand-pills" id="brandFilters">
+        <button class="brand-pill active" data-brand="ALL"><i class="fa-solid fa-border-all"></i> All Brands</button>
+        <button class="brand-pill" data-brand="Apple"><i class="fa-brands fa-apple"></i> Apple</button>
+        <button class="brand-pill" data-brand="Samsung"><i class="fa-solid fa-mobile"></i> Samsung</button>
+        <button class="brand-pill" data-brand="ASUS"><i class="fa-solid fa-gamepad"></i> ASUS</button>
+        <button class="brand-pill" data-brand="Vivo"><i class="fa-solid fa-camera"></i> Vivo</button>
+        <button class="brand-pill" data-brand="Huawei"><i class="fa-solid fa-microchip"></i> Huawei</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== MAIN CONTENT ===== -->
+  <main class="container">
+    <div class="section-header">
+      <h2 class="section-title">
+        <i class="fa-solid fa-fire-flame-curated" style="color: var(--gold);"></i> Latest Smartphones
+      </h2>
+      <div style="color: var(--text-secondary); font-size: 0.9rem;">
+        Showing <span id="phoneCount" style="color: var(--accent); font-weight: 700;">0</span> smartphones
+      </div>
+    </div>
+
+    <!-- Phone Cards Grid -->
+    <div class="phones-grid" id="phonesGrid">
+      <!-- Rendered dynamically by JS -->
+    </div>
+  </main>
+
+  <!-- ===== PHONE SPECS & VIDEO REVIEW MODAL ===== -->
+  <div class="modal-overlay" id="specsModal">
+    <div class="modal-container">
+      <div class="modal-header">
+        <div class="modal-title-group">
+          <i class="fa-solid fa-table-list" style="color: var(--accent); font-size: 1.4rem;"></i>
+          <div>
+            <h3 class="modal-title" id="modalPhoneTitle">Smartphone Specifications</h3>
+            <span style="font-size: 0.8rem; color: var(--text-muted);" id="modalPhoneSub">Tech Review — Spec Database</span>
+          </div>
+        </div>
+        <button class="modal-close-btn" id="closeSpecsModal"><i class="fa-solid fa-xmark"></i></button>
+      </div>
+
+      <div class="modal-body">
+        <!-- Phone Summary Header -->
+        <div class="spec-header-card" id="modalHeaderCard"></div>
+
+        <!-- Navigation Tabs -->
+        <div class="modal-tabs">
+          <button class="tab-btn active" id="tabSpecsBtn" onclick="switchModalTab('specs')">
+            <i class="fa-solid fa-list"></i> Full Specifications
+          </button>
+          <button class="tab-btn" id="tabVideoBtn" onclick="switchModalTab('video')">
+            <i class="fa-brands fa-youtube" style="color: #ef4444;"></i> Video Review
+          </button>
+        </div>
+
+        <!-- Tab 1: Specs Table -->
+        <div id="tabSpecsContent">
+          <div id="gsmSpecsTableContainer"></div>
+        </div>
+
+        <!-- Tab 2: YouTube Video Player -->
+        <div id="tabVideoContent" style="display:none;">
+          <div id="videoPlayerContainer"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== ADMIN: ADD / EDIT PHONE SPECS MODAL ===== -->
+  <div class="modal-overlay" id="adminModal">
+    <div class="modal-container">
+      <div class="modal-header">
+        <div class="modal-title-group">
+          <i class="fa-solid fa-sliders" style="color: var(--gold); font-size: 1.4rem;"></i>
+          <h3 class="modal-title" id="adminModalTitle">Add New Mobile Phone</h3>
+        </div>
+        <button class="modal-close-btn" id="closeAdminModal"><i class="fa-solid fa-xmark"></i></button>
+      </div>
+
+      <div class="modal-body">
+        <form id="adminPhoneForm">
+          <input type="hidden" id="adminPhoneId">
+
+          <!-- Basic Info -->
+          <div class="form-section-title"><i class="fa-solid fa-circle-info"></i> Basic Information</div>
+          <div class="form-grid">
+            <div class="form-group">
+              <label class="form-label">Brand Name *</label>
+              <input type="text" id="inputBrand" class="form-control" placeholder="e.g. Apple, Samsung, ASUS" required>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Model Name *</label>
+              <input type="text" id="inputModel" class="form-control" placeholder="e.g. iPhone 16 Pro Max" required>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Release Date</label>
+              <input type="text" id="inputReleaseDate" class="form-control" placeholder="e.g. 2024, September">
+            </div>
+            <div class="form-group">
+              <label class="form-label">Status</label>
+              <input type="text" id="inputStatus" class="form-control" placeholder="e.g. Available. Released 2024">
+            </div>
+            <div class="form-group">
+              <label class="form-label">Price</label>
+              <input type="text" id="inputPrice" class="form-control" placeholder="e.g. $1,199 / LKR 360,000">
+            </div>
+          </div>
+
+          <!-- Media -->
+          <div class="form-section-title"><i class="fa-solid fa-photo-film"></i> Media & Review Video</div>
+          <div class="form-grid">
+            <div class="form-group full-width">
+              <label class="form-label">Phone Image URL or Upload</label>
+              <div style="display:flex; gap:0.5rem;">
+                <input type="text" id="inputImage" class="form-control" style="flex-grow:1;" placeholder="Paste image URL (https://...)">
+                <label class="btn btn-outline" style="cursor:pointer; margin:0; white-space:nowrap;">
+                  <i class="fa-solid fa-upload"></i> Upload
+                  <input type="file" id="inputImageFile" accept="image/*" style="display:none;" onchange="handleImageUpload(event)">
+                </label>
+              </div>
+            </div>
+            <div class="form-group full-width">
+              <label class="form-label"><i class="fa-brands fa-youtube" style="color:#ef4444;"></i> YouTube Review Video URL or ID</label>
+              <input type="text" id="inputYoutubeUrl" class="form-control" placeholder="e.g. https://www.youtube.com/watch?v=eDqfg_Lexke">
+              <span style="font-size:0.75rem; color:var(--text-muted);">Video will be embedded and playable directly on screen.</span>
+            </div>
+          </div>
+
+          <!-- Specifications -->
+          <div class="form-section-title"><i class="fa-solid fa-microchip"></i> Detailed Specifications</div>
+          <div class="form-grid">
+            <div class="form-group">
+              <label class="form-label">Network Technology</label>
+              <input type="text" id="specNetworkTech" class="form-control" placeholder="e.g. GSM / HSPA / LTE / 5G">
+            </div>
+            <div class="form-group">
+              <label class="form-label">SIM Type</label>
+              <input type="text" id="specSim" class="form-control" placeholder="e.g. Dual SIM (Nano-SIM, eSIM)">
+            </div>
+            <div class="form-group">
+              <label class="form-label">Dimensions</label>
+              <input type="text" id="specDimensions" class="form-control" placeholder="e.g. 163.0 x 77.6 x 8.25 mm">
+            </div>
+            <div class="form-group">
+              <label class="form-label">Weight</label>
+              <input type="text" id="specWeight" class="form-control" placeholder="e.g. 227 g (8.01 oz)">
+            </div>
+            <div class="form-group">
+              <label class="form-label">IP Rating / Waterproof</label>
+              <input type="text" id="specIpRating" class="form-control" placeholder="e.g. IP68 dust/water resistant">
+            </div>
+            <div class="form-group">
+              <label class="form-label">Display Type</label>
+              <input type="text" id="specDisplayType" class="form-control" placeholder="e.g. LTPO OLED, 120Hz, HDR10+">
+            </div>
+            <div class="form-group">
+              <label class="form-label">Display Size</label>
+              <input type="text" id="specDisplaySize" class="form-control" placeholder="e.g. 6.9 inches">
+            </div>
+            <div class="form-group">
+              <label class="form-label">Display Resolution</label>
+              <input type="text" id="specDisplayRes" class="form-control" placeholder="e.g. 1320 x 2868 pixels (~460 ppi)">
+            </div>
+            <div class="form-group">
+              <label class="form-label">Operating System (OS)</label>
+              <input type="text" id="specOs" class="form-control" placeholder="e.g. iOS 18 / Android 14">
+            </div>
+            <div class="form-group">
+              <label class="form-label">Chipset / CPU</label>
+              <input type="text" id="specChipset" class="form-control" placeholder="e.g. Apple A18 Pro / Snapdragon 8 Gen 3">
+            </div>
+            <div class="form-group">
+              <label class="form-label">GPU</label>
+              <input type="text" id="specGpu" class="form-control" placeholder="e.g. Apple GPU (6-core) / Adreno 750">
+            </div>
+            <div class="form-group">
+              <label class="form-label">Internal Storage & RAM</label>
+              <input type="text" id="specMemoryInternal" class="form-control" placeholder="e.g. 256GB/512GB/1TB, 12GB RAM">
+            </div>
+            <div class="form-group full-width">
+              <label class="form-label">Main Camera Setup</label>
+              <input type="text" id="specMainCamera" class="form-control" placeholder="e.g. 50 MP (wide, OIS), 50 MP (periscope), 48 MP (ultrawide)">
+            </div>
+            <div class="form-group full-width">
+              <label class="form-label">Selfie Camera Setup</label>
+              <input type="text" id="specSelfieCamera" class="form-control" placeholder="e.g. 32 MP, f/2.0 (wide), AF">
+            </div>
+            <div class="form-group">
+              <label class="form-label">Battery Capacity</label>
+              <input type="text" id="specBatteryType" class="form-control" placeholder="e.g. Li-Ion 5000 mAh non-removable">
+            </div>
+            <div class="form-group">
+              <label class="form-label">Charging Speed</label>
+              <input type="text" id="specCharging" class="form-control" placeholder="e.g. 45W wired, 15W wireless">
+            </div>
+            <div class="form-group full-width">
+              <label class="form-label">Sensors</label>
+              <input type="text" id="specSensors" class="form-control" placeholder="e.g. Fingerprint (under display), Face ID, Gyro, NFC">
+            </div>
+          </div>
+
+          <div style="display:flex; justify-content:flex-end; gap:1rem; margin-top:1.5rem; padding-top:1rem; border-top:1px solid var(--border);">
+            <button type="button" class="btn btn-outline" id="cancelAdminModal">Cancel</button>
+            <button type="submit" class="btn btn-admin"><i class="fa-solid fa-floppy-disk"></i> Save Specs</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== AUTHENTICATION MODAL ===== -->
+  <div class="modal-overlay" id="authModal">
+    <div class="modal-container" style="max-width:450px;">
+      <div class="modal-header">
+        <h3 class="modal-title" id="authModalTitle">Sign In — Tech Review</h3>
+        <button class="modal-close-btn" id="closeAuthModal"><i class="fa-solid fa-xmark"></i></button>
+      </div>
+
+      <div class="modal-body" style="overflow:hidden;">
+        <div class="auth-modal-tabs">
+          <button class="auth-tab-btn active" id="tabLoginBtn" onclick="switchAuthTab('login')">
+            <i class="fa-solid fa-right-to-bracket"></i> Sign In
+          </button>
+          <button class="auth-tab-btn" id="tabRegisterBtn" onclick="switchAuthTab('register')">
+            <i class="fa-solid fa-user-plus"></i> Register
+          </button>
+          <div class="auth-tab-glider" id="authTabGlider"></div>
+        </div>
+
+        <div class="auth-forms-slider-wrapper" id="authFormsWrapper">
+          <div class="auth-forms-track" id="authFormsTrack">
+
+            <!-- Slide 1: Login Form -->
+            <div class="auth-form-slide" id="loginSlide">
+              <form id="loginForm">
+                <div class="form-group" style="margin-bottom:1rem;">
+                  <label class="form-label"><i class="fa-solid fa-user"></i> Username</label>
+                  <input type="text" id="loginUsername" class="form-control" placeholder="Enter username" required>
+                </div>
+                <div class="form-group" style="margin-bottom:1.25rem;">
+                  <label class="form-label"><i class="fa-solid fa-lock"></i> Password</label>
+                  <input type="password" id="loginPassword" class="form-control" placeholder="Enter password" required>
+                </div>
+
+                <!-- Demo Credentials Box -->
+                <div class="demo-creds-box">
+                  <strong><i class="fa-solid fa-key"></i> Demo Accounts:</strong><br>
+                  <div class="demo-cred-row">
+                    <span class="user-role-pill role-admin">ADMIN</span>
+                    <code>admin</code> / <code>admin123</code>
+                  </div>
+                  <div class="demo-cred-row" style="margin-top:0.4rem;">
+                    <span class="user-role-pill role-user">USER</span>
+                    <code>user</code> / <code>user123</code>
+                  </div>
+                </div>
+
+                <button type="submit" class="btn btn-primary" style="width:100%; justify-content:center; margin-top:1rem;">
+                  <i class="fa-solid fa-right-to-bracket"></i> Sign In
+                </button>
+
+                <div class="auth-switch-footer" style="text-align:center; margin-top:1.25rem; font-size:0.85rem; color:var(--text-secondary);">
+                  Don't have an account? <a href="#" onclick="switchAuthTab('register'); return false;" style="color:var(--accent); font-weight:600; text-decoration:none;">Register now <i class="fa-solid fa-arrow-right"></i></a>
+                </div>
+              </form>
+            </div>
+
+            <!-- Slide 2: Register Form -->
+            <div class="auth-form-slide" id="registerSlide">
+              <form id="registerForm">
+                <div class="form-group" style="margin-bottom:1rem;">
+                  <label class="form-label"><i class="fa-solid fa-user"></i> Username</label>
+                  <input type="text" id="regUsername" class="form-control" placeholder="Choose a username" required>
+                </div>
+                <div class="form-group" style="margin-bottom:1rem;">
+                  <label class="form-label"><i class="fa-solid fa-id-card"></i> Full Name</label>
+                  <input type="text" id="regName" class="form-control" placeholder="Your full name">
+                </div>
+                <div class="form-group" style="margin-bottom:1rem;">
+                  <label class="form-label"><i class="fa-solid fa-lock"></i> Password</label>
+                  <input type="password" id="regPassword" class="form-control" placeholder="Choose a password" required>
+                </div>
+                <div class="form-group" style="margin-bottom:1.25rem;">
+                  <label class="form-label"><i class="fa-solid fa-user-gear"></i> Account Role</label>
+                  <select id="regRole" class="form-control">
+                    <option value="user">Regular User — Browse & View Specs</option>
+                    <option value="admin">Admin — Add & Edit Phone Specs</option>
+                  </select>
+                </div>
+                <button type="submit" class="btn btn-admin" style="width:100%; justify-content:center;">
+                  <i class="fa-solid fa-user-plus"></i> Create Account
+                </button>
+
+                <div class="auth-switch-footer" style="text-align:center; margin-top:1.25rem; font-size:0.85rem; color:var(--text-secondary);">
+                  Already have an account? <a href="#" onclick="switchAuthTab('login'); return false;" style="color:var(--accent); font-weight:600; text-decoration:none;"><i class="fa-solid fa-arrow-left"></i> Back to Sign In</a>
+                </div>
+              </form>
+            </div>
+
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== TOAST NOTIFICATIONS ===== -->
+  <div class="toast-container" id="toastContainer"></div>
+
+  <!-- Scripts -->
+  <script src="js/backend.js"></script>
+  <script src="js/app.js"></script>
+</body>
+</html>
