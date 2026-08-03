@@ -1,17 +1,18 @@
 <?php
 /**
- * TECH REVIEW — XAMPP Database Connection Config
- * Edit the credentials below to match your XAMPP MySQL setup.
+ * TECH REVIEW — Database Connection Config
  */
 
-define('DB_HOST',     getenv('MYSQLHOST') ?: 'maglev.proxy.rlwy.net');
+// If running on Railway, it provides MYSQLHOST, MYSQLUSER, etc. automatically.
+// If running locally on XAMPP, it falls back to your local settings.
+define('DB_HOST',     getenv('MYSQLHOST') ?: 'localhost');
 define('DB_USER',     getenv('MYSQLUSER') ?: 'root');
-define('DB_PASS',     getenv('MYSQLPASSWORD') ?: 'esgekfsyZuOMfifECkBJZBdbhYclkPXh');
+define('DB_PASS',     getenv('MYSQLPASSWORD') ?: '');
 define('DB_NAME',     getenv('MYSQLDATABASE') ?: 'railway');
-define('DB_PORT',     getenv('MYSQLPORT') ?: '12001');
+define('DB_PORT',     (int)(getenv('MYSQLPORT') ?: 3306));
 define('DB_CHARSET',  'utf8mb4');
 
-// CORS headers — allow the frontend to call these PHP endpoints
+// CORS headers
 header('Access-Control-Allow-Origin: *');
 header('Access-Control-Allow-Methods: GET, POST, PUT, DELETE, OPTIONS');
 header('Access-Control-Allow-Headers: Content-Type, Authorization');
@@ -25,10 +26,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
 
 /**
  * Create and return a MySQLi connection.
- * Sends a JSON error and exits if connection fails.
  */
 function getDB(): mysqli {
-    $conn = new mysqli(DB_HOST, DB_USER, DB_PASS, DB_NAME, (int)DB_PORT);
+    $conn = new mysqli(DB_HOST, DB_USER, DB_PASS, DB_NAME, DB_PORT);
 
     if ($conn->connect_error) {
         http_response_code(500);
@@ -43,26 +43,17 @@ function getDB(): mysqli {
     return $conn;
 }
 
-/**
- * Send a JSON response and exit.
- */
 function respond(array $data, int $code = 200): void {
     http_response_code($code);
     echo json_encode($data);
     exit();
 }
 
-/**
- * Get the raw request body decoded as an array.
- */
 function getBody(): array {
     $raw = file_get_contents('php://input');
     return json_decode($raw, true) ?? [];
 }
 
-/**
- * Extract YouTube video ID from a URL or return the raw ID if already short.
- */
 function extractYouTubeId(string $input): string {
     if (empty($input)) return '';
     $trimmed = trim($input);
