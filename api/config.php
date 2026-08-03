@@ -4,11 +4,11 @@
  * Edit the credentials below to match your XAMPP MySQL setup.
  */
 
-define('DB_HOST',     getenv('MYSQLHOST') ?: 'hayabusa.proxy.rlwy.net');
+define('DB_HOST',     getenv('MYSQLHOST') ?: 'maglev.proxy.rlwy.net');
 define('DB_USER',     getenv('MYSQLUSER') ?: 'root');
-define('DB_PASS',     getenv('MYSQLPASSWORD') ?: 'IFFIaDpOitkotDdPJnSPkKsABKTndEkn');
+define('DB_PASS',     getenv('MYSQLPASSWORD') ?: 'esgekfsyZuOMfifECkBJZBdbhYclkPXh');
 define('DB_NAME',     getenv('MYSQLDATABASE') ?: 'railway');
-define('DB_PORT',     getenv('MYSQLPORT') ?: '57169');
+define('DB_PORT',     getenv('MYSQLPORT') ?: '12001');
 define('DB_CHARSET',  'utf8mb4');
 
 // CORS headers — allow the frontend to call these PHP endpoints
@@ -36,7 +36,7 @@ function getDB(): mysqli {
             'success' => false,
             'message' => 'Database connection failed: ' . $conn->connect_error
         ]);
-        exit()
+        exit();
     }
 
     $conn->set_charset(DB_CHARSET);
