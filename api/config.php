@@ -4,10 +4,11 @@
  * Edit the credentials below to match your XAMPP MySQL setup.
  */
 
-define('DB_HOST',     'localhost');
-define('DB_USER',     'root');         // XAMPP default username
-define('DB_PASS',     '');             // XAMPP default password (empty)
-define('DB_NAME',     'techreview');
+define('DB_HOST',     getenv('MYSQLHOST') ?: 'hayabusa.proxy.rlwy.net');
+define('DB_USER',     getenv('MYSQLUSER') ?: 'root');
+define('DB_PASS',     getenv('MYSQLPASSWORD') ?: 'IFFIaDpOitkotDdPJnSPkKsABKTndEkn');
+define('DB_NAME',     getenv('MYSQLDATABASE') ?: 'railway');
+define('DB_PORT',     getenv('MYSQLPORT') ?: '57169');
 define('DB_CHARSET',  'utf8mb4');
 
 // CORS headers — allow the frontend to call these PHP endpoints
@@ -27,7 +28,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
  * Sends a JSON error and exits if connection fails.
  */
 function getDB(): mysqli {
-    $conn = new mysqli(DB_HOST, DB_USER, DB_PASS, DB_NAME);
+    $conn = new mysqli(DB_HOST, DB_USER, DB_PASS, DB_NAME, (int)DB_PORT);
 
     if ($conn->connect_error) {
         http_response_code(500);
@@ -35,7 +36,7 @@ function getDB(): mysqli {
             'success' => false,
             'message' => 'Database connection failed: ' . $conn->connect_error
         ]);
-        exit();
+        exit()
     }
 
     $conn->set_charset(DB_CHARSET);
