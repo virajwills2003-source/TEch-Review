@@ -13,8 +13,8 @@ const BackendService = (function () {
   /* ==========================================
      ENVIRONMENT DETECTION
   ========================================== */
-  const IS_XAMPP = window.location.protocol !== 'file:';
-const API_BASE = IS_XAMPP ? (window.location.origin + window.location.pathname.replace(/\/[^/]*$/, '')) : null;
+ const IS_XAMPP = window.location.protocol !== 'file:';
+const API_BASE = IS_XAMPP ? 'https://tech-review-production.up.railway.app/api' : null;
 
   if (IS_XAMPP) {
     console.log('%c[Tech Review] Running on XAMPP — using PHP/MySQL API at ' + API_BASE, 'color:#3b82f6;font-weight:bold;');
