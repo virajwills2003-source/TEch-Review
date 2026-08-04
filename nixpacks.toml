@@ -1,11 +1,5 @@
 [providers]
 providers = ["php"]
 
-[variables]
-NIXPACKS_PHP_VERSION = "8.2"
-
-[phases.setup]
-nixPkgs = ["php82", "php82Extensions.mysqli", "php82Extensions.pdo_mysql", "php82Extensions.json", "composer"]
-
 [start]
-cmd = "php -S 0.0.0.0:$PORT"
+cmd = "php -S 0.0.0.0:$PORT index.php"
