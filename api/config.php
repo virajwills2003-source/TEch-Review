@@ -3,22 +3,33 @@
  * TECH REVIEW — Database Connection Config
  */
 
-// If running on Railway, it provides MYSQLHOST, MYSQLUSER, etc. automatically.
-// If running locally on XAMPP, it falls back to your local settings.
-define('DB_HOST',     getenv('MYSQLHOST') ?: 'localhost');
-define('DB_USER',     getenv('MYSQLUSER') ?: 'root');
-define('DB_PASS',     getenv('MYSQLPASSWORD') ?: '');
-define('DB_NAME',     getenv('MYSQLDATABASE') ?: 'railway');
-define('DB_PORT',     (int)(getenv('MYSQLPORT') ?: 3306));
-define('DB_CHARSET',  'utf8mb4');
+// Railway MySQL Environment Variable resolution with fallbacks for all common Railway/Cloud MySQL naming conventions
+$dbUrl = getenv('MYSQLURL') ?: getenv('MYSQL_URL') ?: getenv('DATABASE_URL');
+if (!empty($dbUrl)) {
+    $parsed = parse_url($dbUrl);
+    define('DB_HOST', $parsed['host'] ?? 'localhost');
+    define('DB_USER', $parsed['user'] ?? 'root');
+    define('DB_PASS', $parsed['pass'] ?? '');
+    define('DB_NAME', ltrim($parsed['path'] ?? 'railway', '/'));
+    define('DB_PORT', (int)($parsed['port'] ?? 3306));
+} else {
+    define('DB_HOST',    getenv('MYSQLHOST')     ?: getenv('MYSQL_HOST')     ?: getenv('DATABASE_HOST') ?: 'localhost');
+    define('DB_USER',    getenv('MYSQLUSER')     ?: getenv('MYSQL_USER')     ?: getenv('DATABASE_USER') ?: 'root');
+    define('DB_PASS',    getenv('MYSQLPASSWORD') ?: getenv('MYSQL_PASSWORD') ?: getenv('DATABASE_PASSWORD') ?: '');
+    define('DB_NAME',    getenv('MYSQLDATABASE') ?: getenv('MYSQL_DATABASE') ?: getenv('DATABASE_NAME') ?: 'railway');
+    define('DB_PORT',    (int)(getenv('MYSQLPORT') ?: getenv('MYSQL_PORT')  ?: getenv('DATABASE_PORT') ?: 3306));
+}
+define('DB_CHARSET', 'utf8mb4');
 
-// CORS headers
-header('Access-Control-Allow-Origin: *');
+// Dynamic CORS configuration to support credentialed requests from GitHub Pages & local origins
+$origin = $_SERVER['HTTP_ORIGIN'] ?? '*';
+header("Access-Control-Allow-Origin: $origin");
+header('Access-Control-Allow-Credentials: true');
 header('Access-Control-Allow-Methods: GET, POST, PUT, DELETE, OPTIONS');
-header('Access-Control-Allow-Headers: Content-Type, Authorization');
+header('Access-Control-Allow-Headers: Content-Type, Authorization, X-Requested-With');
 header('Content-Type: application/json; charset=utf-8');
 
-// Handle preflight
+// Handle OPTIONS preflight requests immediately
 if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
     http_response_code(200);
     exit();
@@ -28,13 +39,17 @@ if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
  * Create and return a MySQLi connection.
  */
 function getDB(): mysqli {
-    $conn = new mysqli(DB_HOST, DB_USER, DB_PASS, DB_NAME, DB_PORT);
+    // Suppress default PHP warning to return custom JSON error on failure
+    mysqli_report(MYSQLI_REPORT_OFF);
+    $conn = @new mysqli(DB_HOST, DB_USER, DB_PASS, DB_NAME, DB_PORT);
 
     if ($conn->connect_error) {
         http_response_code(500);
         echo json_encode([
             'success' => false,
-            'message' => 'Database connection failed: ' . $conn->connect_error
+            'message' => 'Database connection failed: ' . $conn->connect_error,
+            'host'    => DB_HOST,
+            'database' => DB_NAME
         ]);
         exit();
     }

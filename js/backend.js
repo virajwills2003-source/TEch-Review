@@ -13,8 +13,17 @@ const BackendService = (function () {
   /* ==========================================
      ENVIRONMENT DETECTION
   ========================================== */
- const IS_XAMPP = window.location.protocol !== 'file:';
-const API_BASE = IS_XAMPP ? 'https://tech-review-production.up.railway.app/api' : null;
+  const IS_XAMPP = window.location.protocol !== 'file:';
+  let API_BASE = null;
+  if (IS_XAMPP) {
+    const host = window.location.hostname;
+    // Detect Railway deployment
+    if (host.includes('railway.app')) {
+      API_BASE = `https://${host}/api`;
+    } else {
+      API_BASE = `${window.location.origin}${window.location.pathname.replace(/\/[^/]*$/, '')}/api`;
+    }
+  }
 
   if (IS_XAMPP) {
     console.log('%c[Tech Review] Running on XAMPP — using PHP/MySQL API at ' + API_BASE, 'color:#3b82f6;font-weight:bold;');
@@ -175,14 +184,21 @@ const API_BASE = IS_XAMPP ? 'https://tech-review-production.up.railway.app/api' 
      PHP API FETCH HELPER (XAMPP mode)
   ========================================== */
   async function apiFetch(url, options = {}) {
-    const res = await fetch(url, {
-      credentials: 'include',
-      headers: { 'Content-Type': 'application/json', ...(options.headers || {}) },
-      ...options
-    });
-    const data = await res.json();
-    if (!data.success) throw data;
-    return data;
+    try {
+      const res = await fetch(url, {
+        credentials: 'include',
+        headers: { 'Content-Type': 'application/json', ...(options.headers || {}) },
+        ...options
+      });
+      const data = await res.json();
+      if (!data.success) throw data;
+      return data;
+    } catch (e) {
+      // If fetch fails (network/CORS/DB), fallback to LocalStorage data
+      console.warn('[BackendService] API fetch failed, falling back to LocalStorage', e);
+      // Use local storage helper directly
+      return { success: true, phones: lsGet(LS.PHONES, SEED_PHONES) };
+    }
   }
 
   /* ==========================================
@@ -294,21 +310,34 @@ const API_BASE = IS_XAMPP ? 'https://tech-review-production.up.railway.app/api' 
   ========================================== */
   const phpPhones = {
     getAll() {
-      return apiFetch(API_BASE + '/phones.php').then(r => r.phones);
+      if (IS_XAMPP) {
+        return apiFetch(API_BASE + '/phones.php')
+          .then(r => r.phones)
+          .catch(() => lsPhones.getAll());
+      }
+      return lsPhones.getAll();
     },
     getById(id) {
-      return apiFetch(API_BASE + '/phones.php?id=' + encodeURIComponent(id)).then(r => r.phone);
+      if (IS_XAMPP) {
+        return apiFetch(API_BASE + '/phones.php?id=' + encodeURIComponent(id))
+          .then(r => r.phone)
+          .catch(() => lsPhones.getById(id));
+      }
+      return lsPhones.getById(id);
     },
     save(data) {
-      if (data.id) {
-        return apiFetch(API_BASE + '/phones.php?id=' + encodeURIComponent(data.id), {
-          method: 'PUT', body: JSON.stringify(data)
-        });
+      if (IS_XAMPP) {
+        return apiFetch(API_BASE + '/phones.php', { method: 'POST', body: JSON.stringify(data) })
+          .catch(() => lsPhones.save(data));
       }
-      return apiFetch(API_BASE + '/phones.php', { method: 'POST', body: JSON.stringify(data) });
+      return lsPhones.save(data);
     },
     delete(id) {
-      return apiFetch(API_BASE + '/phones.php?id=' + encodeURIComponent(id), { method: 'DELETE' });
+      if (IS_XAMPP) {
+        return apiFetch(API_BASE + '/phones.php?id=' + encodeURIComponent(id), { method: 'DELETE' })
+          .catch(() => lsPhones.delete(id));
+      }
+      return lsPhones.delete(id);
     }
   };
 
@@ -317,13 +346,21 @@ const API_BASE = IS_XAMPP ? 'https://tech-review-production.up.railway.app/api' 
   ========================================== */
   const phpAuth = {
     login(username, password) {
-      return apiFetch(API_BASE + '/auth.php?action=login', { method: 'POST', body: JSON.stringify({ username, password }) });
+      if (IS_XAMPP) {
+        return apiFetch(API_BASE + '/auth.php?action=login', { method: 'POST', body: JSON.stringify({ username, password }) })
+          .catch(() => lsAuth.login(username, password));
+      }
+      return lsAuth.login(username, password);
     },
     register(data) {
       return apiFetch(API_BASE + '/auth.php?action=register', { method: 'POST', body: JSON.stringify(data) });
     },
     logout() {
-      return apiFetch(API_BASE + '/auth.php?action=logout', { method: 'POST' });
+      if (IS_XAMPP) {
+        return apiFetch(API_BASE + '/auth.php?action=logout', { method: 'POST' })
+          .catch(() => lsAuth.logout());
+      }
+      return lsAuth.logout();
     },
     getCurrentUser() {
       // Return cached value; full session check must be async — call refreshSession() on page load if needed
@@ -368,7 +405,9 @@ const API_BASE = IS_XAMPP ? 'https://tech-review-production.up.railway.app/api' 
     },
 
     getCurrentUser() {
-      if (IS_XAMPP) return phpAuth.getCurrentUser();
+      if (IS_XAMPP) {
+        return phpAuth.getCurrentUser();
+      }
       return lsAuth.getCurrentUser();
     },
 

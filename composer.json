@@ -1,0 +1,15 @@
+{
+  "name": "viraj/tech-review",
+  "description": "Tech Review Smartphone Catalog API & Web App",
+  "type": "project",
+  "require": {
+    "php": "^8.0 || ^8.1 || ^8.2 || ^8.3",
+    "ext-mysqli": "*",
+    "ext-json": "*"
+  },
+  "autoload": {
+    "psr-4": {
+      "TechReview\\": "api/"
+    }
+  }
+}
